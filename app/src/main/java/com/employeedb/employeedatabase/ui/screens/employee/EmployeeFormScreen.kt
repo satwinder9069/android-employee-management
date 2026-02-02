@@ -35,8 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.employeedb.employeedatabase.R
-import com.employeedb.employeedatabase.model.Employee
-import com.employeedb.employeedatabase.navigation.Screen
+import com.employeedb.employeedatabase.data.model.Employee
 import com.employeedb.employeedatabase.ui.components.employees.EmployeeFormState
 import com.employeedb.employeedatabase.ui.utils.formatDate
 import com.employeedb.employeedatabase.ui.utils.parseDate

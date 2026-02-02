@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.employeedb.employeedatabase.model.Employee
+import com.employeedb.employeedatabase.data.model.Employee
 import com.employeedb.employeedatabase.navigation.Screen
 import com.employeedb.employeedatabase.ui.components.common.BottomNavigationBar
 import com.employeedb.employeedatabase.ui.components.employees.EmployeeCountWithFilter
