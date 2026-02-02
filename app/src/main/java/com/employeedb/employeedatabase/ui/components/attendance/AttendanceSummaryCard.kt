@@ -42,7 +42,7 @@ fun AttendanceSummaryCard(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${summary.marked} / ${summary.totalEmployees}",
+                    text = " ${summary.marked} / ${summary.totalEmployees}",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )

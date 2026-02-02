@@ -3,11 +3,9 @@ package com.employeedb.employeedatabase.ui.screens.detail
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
@@ -39,9 +37,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.employeedb.employeedatabase.R
-import com.employeedb.employeedatabase.model.Attendance
-import com.employeedb.employeedatabase.model.AttendanceStatus
-import com.employeedb.employeedatabase.model.Employee
+import com.employeedb.employeedatabase.data.model.Attendance
+import com.employeedb.employeedatabase.data.model.AttendanceStatus
+import com.employeedb.employeedatabase.data.model.Employee
 import com.employeedb.employeedatabase.navigation.Screen
 import com.employeedb.employeedatabase.ui.components.details.ContactInfo
 import com.employeedb.employeedatabase.ui.components.details.EmployeeDetailHeader

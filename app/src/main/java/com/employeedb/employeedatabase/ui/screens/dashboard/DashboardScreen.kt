@@ -35,7 +35,8 @@ import com.employeedb.employeedatabase.viewmodel.EmployeeViewModel
 fun DashboardScreen(
     viewModel: EmployeeViewModel,
     navController: NavHostController,
-    dashboardViewModel: DashboardViewModel = hiltViewModel()
+    dashboardViewModel: DashboardViewModel = hiltViewModel(),
+    onSignOut: () -> Unit = {}
 ) {
 
     // Collect all states
@@ -64,7 +65,8 @@ fun DashboardScreen(
 
                 HeaderSection(
                     modifier = Modifier
-                        .height(150.dp)
+                        .height(150.dp),
+                    onSignOut = { onSignOut() }
                 )
                 StatsSection(
                     totalEmployees = totalEmployees,

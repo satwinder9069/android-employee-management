@@ -38,9 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.employeedb.employeedatabase.data.local.AttendanceWithEmployee
-import com.employeedb.employeedatabase.model.Attendance
-import com.employeedb.employeedatabase.model.AttendanceStatus
-import com.employeedb.employeedatabase.ui.components.common.ConfirmDialogue
+import com.employeedb.employeedatabase.data.model.AttendanceStatus
 
 @Composable
 fun AttendanceList(
