@@ -3,6 +3,8 @@ package com.employeedb.employeedatabase.navigation
 sealed class Screen(
     val route: String
 ) {
+    data object LoginScreen : Screen("login")
+    data object SignUpScreen : Screen("signup")
     data object DashboardScreen : Screen("dashboard")
 
     data object EmployeeListScreen : Screen("employee_list")

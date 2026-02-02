@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -14,28 +16,75 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.employeedb.employeedatabase.ui.screens.attendance.AttendanceScreen
+import com.employeedb.employeedatabase.ui.screens.auth.LoginScreen
+import com.employeedb.employeedatabase.ui.screens.auth.SignUpScreen
 import com.employeedb.employeedatabase.ui.screens.dashboard.DashboardScreen
 import com.employeedb.employeedatabase.ui.screens.detail.DetailScreen
 import com.employeedb.employeedatabase.ui.screens.employee.EmployeeFormScreen
 import com.employeedb.employeedatabase.ui.screens.employee.EmployeeScreen
+import com.employeedb.employeedatabase.ui.screens.settings.SettingsScreen
+import com.employeedb.employeedatabase.viewmodel.AuthViewModel
 import com.employeedb.employeedatabase.viewmodel.EmployeeViewModel
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    viewModel: EmployeeViewModel = hiltViewModel()
+    viewModel: EmployeeViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+
+    val startDestination = if (isLoggedIn) {
+        Screen.DashboardScreen.route
+    } else {
+        Screen.LoginScreen.route
+    }
     NavHost(
         navController = navController,
-        startDestination = Screen.DashboardScreen.route
+        startDestination = startDestination
     ) {
+        composable(
+            route = Screen.LoginScreen.route
+        ) {
+            LoginScreen(
+                onNavigateToSignUp = {
+                    navController.navigate(Screen.SignUpScreen.route)
+                },
+                onNavigateToDashboard = {
+                    navController.navigate(Screen.DashboardScreen.route) {
+                        popUpTo(Screen.LoginScreen.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Screen.SignUpScreen.route
+        ) {
+            SignUpScreen(
+                onNavigateToLogin = {
+                    navController.popBackStack()
+                },
+                onNavigateToDashboard = {
+                    navController.navigate(Screen.DashboardScreen.route) {
+                        popUpTo(Screen.SignUpScreen.route) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable(
             route = Screen.DashboardScreen.route
         ) {
             DashboardScreen(
                 viewModel = viewModel,
                 navController = navController,
-                dashboardViewModel = hiltViewModel()
+                dashboardViewModel = hiltViewModel(),
+                onSignOut = {
+                    authViewModel.signOut()
+                    navController.navigate(Screen.LoginScreen.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
 
@@ -91,9 +140,7 @@ fun AppNavGraph(
         composable(
             route = Screen.SettingsScreen.route
         ) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Coming Soon")
-            }
+            SettingsScreen(navController = navController, authViewModel = authViewModel)
         }
     }
 }
