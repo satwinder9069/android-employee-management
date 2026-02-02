@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.employeedb.employeedatabase.data.local.AttendanceWithEmployee
 import com.employeedb.employeedatabase.data.repository.AttendanceRepository
 import com.employeedb.employeedatabase.data.repository.EmployeeRepository
-import com.employeedb.employeedatabase.model.Attendance
-import com.employeedb.employeedatabase.model.AttendanceStatus
-import com.employeedb.employeedatabase.model.Employee
+import com.employeedb.employeedatabase.data.model.Attendance
+import com.employeedb.employeedatabase.data.model.AttendanceStatus
+import com.employeedb.employeedatabase.data.model.Employee
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,6 +31,8 @@ class AttendanceViewModel @Inject constructor(
 
     private val _selectedDate = MutableStateFlow(getCurrentDateInMillis())
     val selectedDate: StateFlow<Long> = _selectedDate.asStateFlow()
+
+    private val attendanceCache = mutableMapOf<Long, StateFlow<List<Attendance>>>()
 
     // all employees
     val employees: StateFlow<List<Employee>> = employeeRepository.getEmployees()
@@ -66,14 +68,16 @@ class AttendanceViewModel @Inject constructor(
         initialValue = AttendanceSummary()
     )
 
-    fun getRecentAttendance(employeeId: Long): StateFlow<List<Attendance>> =
-        repository.getRecentAttendance(employeeId)
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList()
-            )
-
+    fun getRecentAttendance(employeeId: Long): StateFlow<List<Attendance>> {
+        return attendanceCache.getOrPut(employeeId) {
+            repository.getRecentAttendance(employeeId)
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5_000),
+                    initialValue = emptyList()
+                )
+        }
+    }
 
     fun getAttendanceByDate(employeeId: Long, date: Long): StateFlow<Attendance?> {
         return repository
@@ -96,6 +100,10 @@ class AttendanceViewModel @Inject constructor(
         status: AttendanceStatus
     ) {
         viewModelScope.launch {
+
+            if (repository.attendanceExists(employeeId, selectedDate.value)) {
+                return@launch
+            }
             val totalHours = if (inTime != null && outTime != null) {
                 calculateTotalHours(inTime, outTime)
             } else null
@@ -109,21 +117,31 @@ class AttendanceViewModel @Inject constructor(
                 totalHours = totalHours,
                 status = status
             )
-            repository.insertAttendance(attendance)
+            val exists =
+                repository.attendanceExists(
+                    employeeId,
+                    selectedDate.value
+                )
+
+            if (exists) {
+                repository.updateAttendance(attendance)
+            } else {
+                repository.insertAttendance(attendance)
+            }
         }
     }
 
-    suspend fun checkAttendanceExists(employeeId: Long, date: Long): Boolean {
+    private suspend fun checkAttendanceExists(employeeId: Long, date: Long): Boolean {
         return repository.attendanceExists(employeeId, date)
     }
 
-    fun insertAttendance(attendance: Attendance) {
+    private fun insertAttendance(attendance: Attendance) {
         viewModelScope.launch {
             repository.insertAttendance(attendance)
         }
     }
 
-    fun updateAttendance(attendance: Attendance) {
+    private fun updateAttendance(attendance: Attendance) {
         viewModelScope.launch {
             repository.updateAttendance(attendance)
         }
@@ -153,7 +171,7 @@ class AttendanceViewModel @Inject constructor(
 
             if (inDate != null && outDate != null) {
                 val diff = outDate.time - inDate.time
-                val hours = TimeUnit.MICROSECONDS.toHours(diff)
+                val hours = TimeUnit.MILLISECONDS.toHours(diff)
                 val minutes = TimeUnit.MILLISECONDS.toMinutes(diff) % 60
 
                 "${hours}h ${minutes}m"
