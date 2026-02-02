@@ -1,6 +1,5 @@
 package com.employeedb.employeedatabase.ui.components.attendance
 
-import android.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,10 +23,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.employeedb.employeedatabase.model.AttendanceStatus
-import com.employeedb.employeedatabase.model.Employee
+import com.employeedb.employeedatabase.data.model.AttendanceStatus
+import com.employeedb.employeedatabase.data.model.Employee
 import com.employeedb.employeedatabase.viewmodel.AttendanceViewModel
-import kotlin.math.exp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
