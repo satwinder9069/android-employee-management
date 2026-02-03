@@ -17,6 +17,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -27,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,7 +44,9 @@ import com.employeedb.employeedatabase.ui.components.employees.EmployeeFormState
 import com.employeedb.employeedatabase.ui.utils.formatDate
 import com.employeedb.employeedatabase.ui.utils.parseDate
 import com.employeedb.employeedatabase.viewmodel.EmployeeViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,10 +65,15 @@ fun EmployeeFormScreen(
     }.collectAsState(initial = null)
 
     val datePicker = rememberDatePickerState(
-            initialSelectedDateMillis = employee?.joinDate
+        initialSelectedDateMillis = employee?.joinDate
     )
 
     var showDatePicker by remember { mutableStateOf(false) }
+
+
+    val emailError by viewModel.emailError.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(employee) {
         employee?.let {
@@ -76,7 +87,24 @@ fun EmployeeFormScreen(
         }
     }
 
+    LaunchedEffect(viewModel.uiEvent) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is EmployeeViewModel.UiEvent.EmployeeSaved -> {
+                    navController.popBackStack()
+                }
+
+                is EmployeeViewModel.UiEvent.ShowError -> {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(event.message)
+                    }
+                }
+            }
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -106,15 +134,25 @@ fun EmployeeFormScreen(
                 onValueChange = {
                     formState = formState.copy(name = it)
                 },
-                label = { Text("Name") }
+                label = { Text("Name") },
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = formState.email,
                 onValueChange = {
                     formState = formState.copy(email = it)
+
+                    if (emailError != null) viewModel.clearEmailError()
                 },
-                label = { Text("Email") }
+                label = { Text("Email") },
+                isError = emailError != null,
+                supportingText = {
+                    emailError?.let {
+                        Text(it, color = Color.Red)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
@@ -122,7 +160,8 @@ fun EmployeeFormScreen(
                 onValueChange = {
                     formState = formState.copy(role = it)
                 },
-                label = { Text("Role") }
+                label = { Text("Role") },
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
@@ -130,7 +169,8 @@ fun EmployeeFormScreen(
                 onValueChange = {
                     formState = formState.copy(department = it)
                 },
-                label = { Text("Department") }
+                label = { Text("Department") },
+                modifier = Modifier.fillMaxWidth()
             )
 
             Box(
@@ -152,12 +192,12 @@ fun EmployeeFormScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            if(showDatePicker) {
+            if (showDatePicker) {
                 DatePickerDialog(
-                    onDismissRequest = {showDatePicker = false},
+                    onDismissRequest = { showDatePicker = false },
                     confirmButton = {
                         TextButton(onClick = {
-                            datePicker.selectedDateMillis?.let { millis->
+                            datePicker.selectedDateMillis?.let { millis ->
                                 formState = formState.copy(
                                     joinDate = formatDate(millis)
                                 )
@@ -196,8 +236,8 @@ fun EmployeeFormScreen(
                     } else {
                         viewModel.updateEmp(employee)
                     }
-                    navController.popBackStack()
                 },
+                enabled = emailError == null && validateForm(formState) == null,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(

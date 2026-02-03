@@ -38,7 +38,7 @@ fun EmployeeItem(employee: Employee, navController: NavHostController) {
             .fillMaxWidth()
             .clickable{navController.navigate(Screen.DetailScreen.createRoute(employee.id))},
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFEFFFF)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(
@@ -83,10 +83,10 @@ fun EmployeeItem(employee: Employee, navController: NavHostController) {
                 }
 
                 Text(
-                    text = employee.department, fontSize = 13.sp, color = Color.Gray
+                    text = employee.department, fontSize = 14.sp, color = Color.Gray
                 )
                 Text(
-                    text = employee.role, fontSize = 12.sp, color = Color.LightGray
+                    text = employee.role, fontSize = 12.sp, color = Color.Gray
                 )
             }
             IconButton(
