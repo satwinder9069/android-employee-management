@@ -98,7 +98,7 @@ app/
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/YOUR_USERNAME/employee-management-system.git
+git clone https://github.com/satwinder9069/employee-management-system.git
 cd employee-management-system
 ```
 
